@@ -14,10 +14,12 @@ https://chatgpt.com/share/6a062de8-5c84-83eb-8e6f-8a38d2d4bf52
 
 https://chatgpt.com/share/6a062e09-fd28-83eb-8b98-7e0d6fcf23bc
 
-
+https://chatgpt.com/share/6a06ad7e-f050-8333-8812-aef90d06b601
 https://gemini.google.com/share/2c653d661afa
 https://gemini.google.com/app/aae8098dbccb1748
 https://gemini.google.com/app/aae8098dbccb1748
+
+https://www.perplexity.ai/search/37d3d378-2e0f-4073-aa93-a29473061e5b
 
 
 I get a feeling that currently we are not storing very effective data for a text search. THere are very few types of query we could ask. 

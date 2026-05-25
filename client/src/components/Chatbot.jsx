@@ -25,29 +25,27 @@ const SUGGESTIONS = [
 function fileToBase64(file) {
 	return new Promise((resolve, reject) => {
 		const reader = new FileReader();
-		reader.onload = () => resolve(reader.result.split(",")[1]); // strip data:...;base64,
+		reader.onload = () => resolve(reader.result.split(",")[1]);
 		reader.onerror = reject;
 		reader.readAsDataURL(file);
 	});
 }
 
-// API call — sends text messages + optional image as base64
 async function callChatAPI(messages, imageFile = null) {
 	const formData = new FormData();
 
-	// Send only the latest user question to the backend
 	const lastUserMessage = [...messages]
 		.reverse()
 		.find((m) => m.role === "user");
 	formData.append("question", lastUserMessage?.content || "");
 
 	if (imageFile) {
-		formData.append("image", imageFile); // This matches upload.single('image')
+		formData.append("image", imageFile);
 	}
 
 	const res = await fetch(CHAT_API_URL, {
 		method: "POST",
-		body: formData, // No headers needed, browser sets Content-Type to multipart/form-data
+		body: formData,
 	});
 
 	if (!res.ok) {
@@ -55,10 +53,9 @@ async function callChatAPI(messages, imageFile = null) {
 		throw new Error(err.message || `API error ${res.status}`);
 	}
 
-	return await res.json(); // Returns { reply, evidenceImages }
+	return await res.json();
 }
 
-// Typing animation dots
 function TypingDots() {
 	return (
 		<div className="flex items-center gap-1.5 px-1 py-0.5">
@@ -72,15 +69,13 @@ function TypingDots() {
 		</div>
 	);
 }
-// Single message bubble
+
 function Message({ msg }) {
 	const isUser = msg.role === "user";
 	const isError = msg.role === "error";
 
 	return (
 		<div className={`flex gap-2.5 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
-			{/* ... Avatar code stays same ... */}
-
 			<div
 				className={[
 					"max-w-[86%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed",
@@ -89,7 +84,6 @@ function Message({ msg }) {
 						: "bg-slate-800/60 text-slate-100",
 				].join(" ")}
 			>
-				{/* 1. Show user's local upload preview */}
 				{msg.previewUrl && (
 					<img
 						src={msg.previewUrl}
@@ -97,7 +91,6 @@ function Message({ msg }) {
 					/>
 				)}
 
-				{/* 2. Show the AI's evidence image from the backend */}
 				{msg.evidenceUrl && (
 					<div className="mb-2 space-y-1">
 						<p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">
@@ -112,7 +105,6 @@ function Message({ msg }) {
 				)}
 
 				<p className="whitespace-pre-wrap">{msg.content}</p>
-				{/* ... Timestamp stays same ... */}
 			</div>
 		</div>
 	);
@@ -136,19 +128,16 @@ export default function Chatbot({ trafficContext = {} }) {
 	const inputRef = useRef(null);
 	const textareaRef = useRef(null);
 	const fileInputRef = useRef(null);
-	const [pendingImage, setPendingImage] = useState(null); // { file, previewUrl }
+	const [pendingImage, setPendingImage] = useState(null);
 
-	// Scroll to bottom on new messages
 	useEffect(() => {
 		bottomRef.current?.scrollIntoView({ behavior: "smooth" });
 	}, [messages, loading]);
 
-	// Focus input when opened
 	useEffect(() => {
 		if (open) setTimeout(() => inputRef.current?.focus(), 120);
 	}, [open]);
 
-	// Auto-resize textarea
 	const handleInput = (e) => {
 		setInput(e.target.value);
 		e.target.style.height = "auto";
@@ -176,7 +165,6 @@ export default function Chatbot({ trafficContext = {} }) {
 			setPendingImage(null);
 
 			try {
-				// Updated call
 				const data = await callChatAPI(nextMessages, imageToSend);
 
 				setMessages((prev) => [
@@ -184,7 +172,7 @@ export default function Chatbot({ trafficContext = {} }) {
 					{
 						role: "assistant",
 						content: data.reply,
-						// Grab the first evidence image URL if it exists
+
 						evidenceUrl: data.evidenceImages?.[0]?.url || null,
 						ts: Date.now(),
 					},
@@ -221,13 +209,11 @@ export default function Chatbot({ trafficContext = {} }) {
 
 	const showSuggestions = messages.length <= 1 && !loading;
 
-	// Panel dimensions
 	const panelWidth = expanded ? "w-[520px]" : "w-[380px]";
 	const panelHeight = expanded ? "h-[680px]" : "h-[540px]";
 
 	return (
 		<>
-			{/* ── FAB (floating action button) ────────────────── */}
 			<button
 				onClick={() => setOpen((v) => !v)}
 				aria-label="Toggle Traffic AI chat"
@@ -248,7 +234,6 @@ export default function Chatbot({ trafficContext = {} }) {
 				</span>
 			</button>
 
-			{/* ── Chat Panel ──────────────────────────────────── */}
 			<div
 				className={[
 					"fixed bottom-6 right-6 z-50 flex flex-col",
@@ -263,7 +248,6 @@ export default function Chatbot({ trafficContext = {} }) {
 						: "opacity-0 translate-y-4 scale-95 pointer-events-none",
 				].join(" ")}
 			>
-				{/* Header */}
 				<div className="flex flex-shrink-0 items-center justify-between border-b border-indigo-500/20 bg-gradient-to-r from-[#0f0f1a] via-[#13102a] to-[#0f0f1a] px-4 py-3.5">
 					<div className="flex items-center gap-3">
 						<div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-400/20 ring-1 ring-indigo-400/60 shadow-[0_0_16px_rgba(99,102,241,0.4)]">
@@ -281,7 +265,6 @@ export default function Chatbot({ trafficContext = {} }) {
 					</div>
 
 					<div className="flex items-center gap-1">
-						{/* Clear */}
 						<button
 							onClick={clearChat}
 							title="Clear chat"
@@ -290,7 +273,6 @@ export default function Chatbot({ trafficContext = {} }) {
 							Clear
 						</button>
 
-						{/* Expand/shrink */}
 						<button
 							onClick={() => setExpanded((v) => !v)}
 							className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 transition hover:bg-indigo-500/10 hover:text-indigo-300"
@@ -298,7 +280,6 @@ export default function Chatbot({ trafficContext = {} }) {
 							{expanded ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
 						</button>
 
-						{/* Close */}
 						<button
 							onClick={() => setOpen(false)}
 							className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 transition hover:bg-red-500/10 hover:text-red-400"
@@ -308,7 +289,6 @@ export default function Chatbot({ trafficContext = {} }) {
 					</div>
 				</div>
 
-				{/* Messages */}
 				<div className="flex-1 overflow-y-auto px-4 py-4 bg-[#0c0c18]">
 					<div className="space-y-4">
 						{messages.map((msg, i) => (
@@ -330,7 +310,6 @@ export default function Chatbot({ trafficContext = {} }) {
 					</div>
 				</div>
 
-				{/* Suggestions */}
 				{showSuggestions && (
 					<div className="flex-shrink-0 space-y-1.5 border-t border-indigo-500/15 bg-[#0c0c18] px-4 py-3">
 						<p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-indigo-400/50">
@@ -352,9 +331,7 @@ export default function Chatbot({ trafficContext = {} }) {
 					</div>
 				)}
 
-				{/* Input */}
 				<div className="flex-shrink-0 border-t border-indigo-500/15 bg-[#0f0f1a] p-3">
-					{/* Image preview strip */}
 					{pendingImage && (
 						<div className="mb-2 flex items-center gap-2 rounded-xl bg-indigo-950/40 px-3 py-2 ring-1 ring-indigo-500/20">
 							<img
@@ -374,7 +351,6 @@ export default function Chatbot({ trafficContext = {} }) {
 						</div>
 					)}
 
-					{/* Hidden file input */}
 					<input
 						ref={fileInputRef}
 						type="file"
@@ -385,12 +361,11 @@ export default function Chatbot({ trafficContext = {} }) {
 							if (!file) return;
 							const previewUrl = URL.createObjectURL(file);
 							setPendingImage({ file, previewUrl });
-							e.target.value = ""; // reset so same file can be re-selected
+							e.target.value = "";
 						}}
 					/>
 
 					<div className="flex items-end gap-2">
-						{/* Upload button */}
 						<button
 							onClick={() => fileInputRef.current?.click()}
 							disabled={loading}
