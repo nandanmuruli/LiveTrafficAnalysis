@@ -16,7 +16,7 @@ const trafficStatsSchema = new mongoose.Schema(
       of: Number,
       default: {},
     },
-    totalViolations: { type: Number, default: 0 },
+totalViolations: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
